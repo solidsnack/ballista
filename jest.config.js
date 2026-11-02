@@ -3,5 +3,4 @@ module.exports = {
     testEnvironment: "node",
     coverageDirectory: "tmp/coverage",
     collectCoverage: true,
-    coverageProvider: "v8",
 }
