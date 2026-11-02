@@ -1,4 +1,4 @@
-const pound = 0.454 // Definition
+const pound = 0.45359237 // Definition
 const inch = 0.0254 // Definition
 
 // Ballistic coefficients expressed in customary are pounds/inch².
@@ -6,9 +6,9 @@ const customaryBC = pound / (inch * inch)
 
 export const bcConversions = {
     customary: {
-        toMGS: customaryBC,
+        toMetric: customaryBC,
         // Ballistic coefficients in metric are expressed as kg/m².
-        fromMGS: 1 / customaryBC,
+        fromMetric: 1 / customaryBC,
     },
 }
 
