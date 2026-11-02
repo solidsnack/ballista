@@ -3,7 +3,7 @@ import * as fs from "fs/promises"
 import * as circle from "./circle"
 import { Solver } from "./constant_altitude"
 import * as dim3 from "./dim3"
-import { g1, g7 } from "./g-models"
+import { bcConversions, g1, g7 } from "./g-models"
 import { meterPlanes } from "./planes"
 
 describe("9mm NATO test", () => {
@@ -11,7 +11,7 @@ describe("9mm NATO test", () => {
     const solver = new Solver({
         drag: {
             model: g1,
-            bc: 0.089,
+            bc: bcConversions.customary.toMetric * 0.089,
         },
         mass: 0.008,
         area: circle.areaFromDiameter(0.00901),
@@ -20,7 +20,7 @@ describe("9mm NATO test", () => {
     // Glock configuration for 25m zero.
     const siteHeight = 0.014 // Measured with tape measure
     // Angle of elevation per JBM calculator
-    const angle = convertNATOMRadToRadians(1.65)
+    const angle = 1.65 / 1000.0
     const v: dim3.Vec = [360, 0, 0]
 
     const v0: dim3.Vec = applyElevation(angle, v)
@@ -50,7 +50,7 @@ describe("Mk 262 (5.56mm) test", () => {
     const solver = new Solver({
         drag: {
             model: g7,
-            bc: 0.181,
+            bc: bcConversions.customary.toMetric * 0.181,
         },
         mass: 0.005,
         area: circle.areaFromDiameter(0.0057),
@@ -59,7 +59,7 @@ describe("Mk 262 (5.56mm) test", () => {
     // Mk 12 SPR (an AR-15 variant) configuration.
     const siteHeight = 0.066
     // Zero close to 50m.
-    const angle = convertNATOMRadToRadians(1.8) //681)
+    const angle = 1.681 / 1000.0
     const v: dim3.Vec = [838, 0, 0]
 
     const v0: dim3.Vec = applyElevation(angle, v)
@@ -81,35 +81,33 @@ describe("Mk 262 (5.56mm) test", () => {
             expect(Math.abs(a - b)).toBeLessThanOrEqual(absDiff)
         }
 
-        // Overall our trajectories are (a) too low and (b) too fast.
-
         // 50m
         const canonical050m = { t: 0.061, v: 796, y: 0 }
         const result050m = table[1]
-        within(t(result050m), canonical050m.t, 0.001)
-        within(drop(result050m), canonical050m.y, 0.01)
-        within(totalV(result050m), canonical050m.v, 10)
+        within(t(result050m), canonical050m.t, 0.0005)
+        within(drop(result050m), canonical050m.y, 0.001)
+        within(totalV(result050m), canonical050m.v, 0.5)
 
         // 100m
         const canonical100m = { t: 0.126, v: 755, y: 0.027 }
         const result100m = table[2]
-        within(t(result100m), canonical100m.t, 0.001)
-        within(drop(result100m), canonical100m.y, 0.03)
-        within(totalV(result100m), canonical100m.v, 16)
+        within(t(result100m), canonical100m.t, 0.0005)
+        within(drop(result100m), canonical100m.y, 0.001)
+        within(totalV(result100m), canonical100m.v, 1)
 
         // 200m
         const canonical200m = { t: 0.266, v: 677, y: -0.052 }
         const result200m = table[3]
-        within(t(result200m), canonical200m.t, 0.004)
-        within(drop(result200m), canonical200m.y, 0.05)
-        within(totalV(result200m), canonical200m.v, 25)
+        within(t(result100m), canonical100m.t, 0.0005)
+        within(drop(result200m), canonical200m.y, 0.001)
+        within(totalV(result200m), canonical200m.v, 2)
 
         // 400m
         const canonical400m = { t: 0.598, v: 536, y: -0.911 }
         const result400m = table[4]
-        within(t(result400m), canonical400m.t, 0.02)
-        within(drop(result400m), canonical400m.y, 0.05)
-        within(totalV(result400m), canonical400m.v, 50)
+        within(t(result400m), canonical400m.t, 0.002)
+        within(drop(result400m), canonical400m.y, 0.005)
+        within(totalV(result400m), canonical400m.v, 4)
 
         await writeTable(table, "tmp/mk262")
     })
@@ -122,10 +120,6 @@ async function writeTable(
     const f = await fs.open(file, "w")
     for (const [t, v, p] of table) await f.write(`${t}\t${v}\t${p}\n`)
     await f.close()
-}
-
-function convertNATOMRadToRadians(mrad: number): number {
-    return 2 * Math.PI * (mrad / 6400)
 }
 
 function applyElevation(elevation: number, v: dim3.Vec): dim3.Vec {

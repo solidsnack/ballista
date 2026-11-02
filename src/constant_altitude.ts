@@ -39,14 +39,18 @@ export class Solver {
                 machNumber
             )
 
-            const absForce =
-                (1 / 2) *
-                density *
-                (absV * absV) *
-                dragCoefficient *
-                projectile.area
+            /*
+            a = ½ρv² · i · Cd_G · A / m
+            a = ½ρv² · (SD/BC) · Cd_G · (πd²/4) / m
+            a = ½ρv² · ((m / d²) / BC) · Cd_G · (πd²/4) / m
+            a = ½ · (π/4) · ρv² · Cd_G · (m / d² · BC) · (d² / m)
+            a = (π/8) · ρv² · Cd_G · (1 / BC)
+            a = (π/8) · ρv² · Cd_G / BC
+            */
 
-            const absAcceleration = absForce / projectile.mass
+            const absAcceleration =
+                ((Math.PI / 8) * density * (absV * absV) * dragCoefficient) /
+                projectile.drag.bc
 
             const acceleration = dim3.add(
                 // Effectively the same as multiplying `-acceleration` by the
@@ -87,7 +91,7 @@ export class Solver {
         yield [lastTime, [...lastVelocity], [...lastPosition]]
 
         while (integrator.step()) {
-            const velocity = integrator.y as [number, number, number]
+            const velocity = [...integrator.y] as [number, number, number]
             const averageVelocity = dim3.multiply(
                 1 / 2,
                 dim3.add(velocity, lastVelocity)

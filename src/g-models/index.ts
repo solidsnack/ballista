@@ -5,6 +5,7 @@ import { GModel, tabular } from "./models"
 
 export { tabular } from "./models"
 export type { GModel, TableRangeError } from "./models"
+export { bcConversions } from "./utils"
 
 function machSortedTable(data: typeof g1data): Array<[number, number]> {
     return data

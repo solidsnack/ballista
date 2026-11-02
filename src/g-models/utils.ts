@@ -25,6 +25,6 @@ export function readCustomaryTSV(text: string): Array<[number, number]> {
         ])
         .map(([mach, customaryBC]) => [
             mach,
-            customaryBC * bcConversions.customary.toMGS,
+            customaryBC * bcConversions.customary.toMetric,
         ])
 }
